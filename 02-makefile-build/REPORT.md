@@ -1,0 +1,15 @@
+- Em hiểu WSL cho phép chạy Linux trên máy Windows. Trong bài này, em dùng Ubuntu 22.04 qua WSL 2 để chạy Bash, GCC 11.4.0 và GNU Make 4.3.
+- Ubuntu có phần mềm và thư viện riêng, đồng thời dùng chung CPU, RAM và có thể đọc file trên ổ Windows. Ví dụ, mã nguồn trên ổ `D:` có thể mở trong Ubuntu qua `/mnt/d/internship/DataLogic`. Nếu Ubuntu thiếu GCC thì cần cài bản GCC cho Linux trong Ubuntu.
+- Hai bên vẫn gọi được công cụ của nhau. Ví dụ, từ PowerShell em có thể chạy `wsl -d Ubuntu-22.04 -- gcc --version` để nhờ Ubuntu chạy GCC. Từ Ubuntu, em cũng có thể gọi chương trình Windows như `notepad.exe`.
+- `gcc -Wall -Wextra -Iinclude -c src/main.c -o build/main.o` biên dịch `main.c` thành `main.o`. `-Wall -Wextra` bật cảnh báo, `-Iinclude` chỉ nơi tìm header, `-c` dừng ở bước tạo object và `-o` đặt tên file đầu ra. Làm tương tự với `sensor.c` để có `sensor.o`.
+- `gcc build/main.o build/sensor.o -o build/sensor-demo` liên kết hai file `.o` thành chương trình. `./build/sensor-demo` chạy chương trình. Đầu ra yêu cầu là `Embedded Linux training: 25 C`.
+- Luồng build là mã C → tiền xử lý → assembly → object → liên kết → chương trình. `-E` dừng sau tiền xử lý, `-S` dừng ở mã assembly, còn `-c` dừng ở file object.
+- `echo $?` in mã thoát của lệnh ngay trước đó. Mã `0` thường báo thành công, mã khác `0` báo lỗi. Ví dụ, thiếu `-Iinclude` có thể gây lỗi tìm header khi biên dịch, còn thiếu `sensor.o` gây lỗi tìm định nghĩa hàm khi liên kết.
+- Bài này dùng GNU Make và yêu cầu viết `Makefile` với các mục tiêu `all`, `test`, `clean`, `install`. Make đọc các quy tắc để quyết định cần chạy lệnh nào.
+- `CC = gcc` gán giá trị `gcc` cho biến `CC`. Khi viết `$(CC)` trong lệnh, Make thay nó bằng `gcc`. `$(TARGET)` và `$(OBJECTS)` cũng lấy giá trị từ các biến đã khai báo.
+- `$(TARGET): $(OBJECTS)` đọc là muốn có file bên trái thì cần các file bên phải. Trong bài, muốn tạo `build/sensor-demo` thì cần `build/main.o` và `build/sensor.o`.
+- Khi chạy `make all`, Make đọc `all: $(TARGET)` rồi kiểm tra các file `.o` mà chương trình cần. Nếu object còn thiếu hoặc cần cập nhật, Make dùng quy tắc `build/%.o: src/%.c | build` để tạo nó. Ví dụ, `%` khớp với `main` nên `src/main.c` được dùng để tạo `build/main.o`. `| build` yêu cầu có thư mục `build` trước. Khi đủ các object, Make liên kết để tạo chương trình nếu cần.
+- Trong lệnh của Makefile, `$@` là tên file đích, `$<` là phụ thuộc đầu tiên và `$^` là danh sách các phụ thuộc thường đã bỏ tên trùng.
+- Giữ các file `.o` riêng giúp Make dùng lại phần đã build. Ví dụ, sửa `sensor.c` thì chỉ cần biên dịch lại `sensor.o` rồi liên kết. GCC tạo file `.d` bằng `-MMD -MP` và Make đọc file đó qua `-include` để biết khi nào header thay đổi thì cần build lại.
+- `make test` kiểm tra đầu ra, `make clean` xóa thư mục `build`, còn `make install DESTDIR="$PWD/staging" PREFIX=/usr` chép chương trình vào `staging/usr/bin/sensor-demo` để thử cài.
+
