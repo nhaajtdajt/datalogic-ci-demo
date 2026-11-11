@@ -1,6 +1,7 @@
 # CI/CD Fundamentals, Shell Scripting, and Docker
 
 ## Goal
+//test
 
 Simulate a CI pipeline locally using shell scripts, then run it in a reproducible Docker environment. Remote CI/CD access is not required. You must implement the scripts, Dockerfile, and stage orchestration yourself; no ready-made pipeline is provided. GitLab CI is an optional extension when permissions are available.
 
