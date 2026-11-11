@@ -1,0 +1,7 @@
+**/build/
+**/staging/
+**/runs/
+.jenkins-local/
+HW/
+HW.zip
+cicd.md
